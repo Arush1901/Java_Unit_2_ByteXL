@@ -1,0 +1,266 @@
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+public class Main {
+
+    //Part b: Student class
+    static class Student implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private String studentID;
+        private String name;
+        private double grade;
+
+        public Student(String studentID, String name, double grade) {
+            this.studentID = studentID;
+            this.name = name;
+            this.grade = grade;
+        }
+
+        @Override
+        public String toString() {
+            return "Student ID: " + studentID + ", Name: " + name + ", Grade: " + grade;
+        }
+    }
+
+    //Part c: Employee class
+    static class Employee implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private String name;
+        private String id;
+        private String designation;
+        private double salary;
+
+        public Employee(String name, String id, String designation, double salary) {
+            this.name = name;
+            this.id = id;
+            this.designation = designation;
+            this.salary = salary;
+        }
+
+        @Override
+        public String toString() {
+            return "ID: " + id + ", Name: " + name + ", Designation: " + designation + ", Salary: $" + salary;
+        }
+    }
+
+    private static final String STUDENT_FILE = "student.ser";
+    private static final String EMPLOYEE_FILE = "employees.ser";
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        boolean running = true;
+
+        while (running) {
+            printMainMenu();
+            String choice = scanner.nextLine();
+
+            switch (choice) {
+                case "1":
+                    sumIntegers(scanner);
+                    break;
+                case "2":
+                    studentSerializationMenu(scanner);
+                    break;
+                case "3":
+                    employeeManagementMenu(scanner);
+                    break;
+                case "4":
+                    running = false;
+                    System.out.println("Exiting application. Goodbye!");
+                    break;
+                default:
+                    System.out.println("Invalid option. Please try again.");
+            }
+        }
+        scanner.close();
+    }
+
+    private static void printMainMenu() {
+        System.out.println("\n=== Main Menu ===");
+        System.out.println("1. Sum of Integers (Autoboxing and Unboxing)");
+        System.out.println("2. Serialize/Deserialize Student Object");
+        System.out.println("3. Employee Management System");
+        System.out.println("4. Exit");
+        System.out.print("Choose an option: ");
+    }
+
+    //Part a: Sum of Integers
+    private static void sumIntegers(Scanner scanner) {
+        System.out.println("\nEnter integers separated by space:");
+        String input = scanner.nextLine();
+
+        String[] inputs = input.split("\\s+");
+        ArrayList<Integer> numbers = new ArrayList<>();
+
+        try {
+            for (String numStr : inputs) {
+                int num = Integer.parseInt(numStr);
+                numbers.add(num);  // Autoboxing
+            }
+
+            int sum = 0;
+            for (Integer number : numbers) {
+                sum += number;  // Unboxing
+            }
+            System.out.println("Sum of entered integers: " + sum);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input detected. Please enter valid integers only.");
+        }
+    }
+
+    //Part b: Student serialization menu
+    private static void studentSerializationMenu(Scanner scanner) {
+        boolean studentMenuRunning = true;
+
+        while (studentMenuRunning) {
+            System.out.println("\n--- Student Serialization Menu ---");
+            System.out.println("1. Serialize Student");
+            System.out.println("2. Deserialize Student");
+            System.out.println("3. Return to Main Menu");
+            System.out.print("Choose an option: ");
+            String choice = scanner.nextLine();
+
+            switch (choice) {
+                case "1":
+                    serializeStudent(scanner);
+                    break;
+                case "2":
+                    deserializeStudent();
+                    break;
+                case "3":
+                    studentMenuRunning = false;
+                    break;
+                default:
+                    System.out.println("Invalid option. Try again.");
+            }
+        }
+    }
+
+    private static void serializeStudent(Scanner scanner) {
+        System.out.print("Enter Student ID: ");
+        String id = scanner.nextLine();
+
+        System.out.print("Enter Student Name: ");
+        String name = scanner.nextLine();
+
+        double grade = 0;
+        System.out.print("Enter Student Grade: ");
+        try {
+            grade = Double.parseDouble(scanner.nextLine());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid grade input. Grade set to 0.");
+        }
+
+        Student student = new Student(id, name, grade);
+
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(STUDENT_FILE))) {
+            oos.writeObject(student);
+            System.out.println("Student object serialized to " + STUDENT_FILE);
+        } catch (IOException e) {
+            System.out.println("Error serializing student: " + e.getMessage());
+        }
+    }
+
+    private static void deserializeStudent() {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(STUDENT_FILE))) {
+            Student student = (Student) ois.readObject();
+            System.out.println("Deserialized Student object:");
+            System.out.println(student);
+        } catch (FileNotFoundException e) {
+            System.out.println("Student file not found. Serialize a student first.");
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Error deserializing student: " + e.getMessage());
+        }
+    }
+
+    //Part c: Employee management menu
+    private static void employeeManagementMenu(Scanner scanner) {
+        boolean employeeMenuRunning = true;
+
+        while (employeeMenuRunning) {
+            System.out.println("\n--- Employee Management Menu ---");
+            System.out.println("1. Add an Employee");
+            System.out.println("2. Display All Employees");
+            System.out.println("3. Return to Main Menu");
+            System.out.print("Choose an option: ");
+            String choice = scanner.nextLine();
+
+            switch (choice) {
+                case "1":
+                    addEmployee(scanner);
+                    break;
+                case "2":
+                    displayEmployees();
+                    break;
+                case "3":
+                    employeeMenuRunning = false;
+                    break;
+                default:
+                    System.out.println("Invalid option. Try again.");
+            }
+        }
+    }
+
+    private static void addEmployee(Scanner scanner) {
+        System.out.print("Enter Employee Name: ");
+        String name = scanner.nextLine();
+
+        System.out.print("Enter Employee ID: ");
+        String id = scanner.nextLine();
+
+        System.out.print("Enter Designation: ");
+        String designation = scanner.nextLine();
+
+        double salary = 0;
+        System.out.print("Enter Salary: ");
+        try {
+            salary = Double.parseDouble(scanner.nextLine());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid salary input, setting salary to 0.");
+        }
+
+        Employee employee = new Employee(name, id, designation, salary);
+
+        List<Employee> employees = new ArrayList<>();
+
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(EMPLOYEE_FILE))) {
+            employees = (List<Employee>) ois.readObject();
+        } catch (FileNotFoundException e) {
+
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Error reading employee data: " + e.getMessage());
+            return;
+        }
+
+        employees.add(employee);
+
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(EMPLOYEE_FILE))) {
+            oos.writeObject(employees);
+            System.out.println("Employee added successfully.");
+        } catch (IOException e) {
+            System.out.println("Error saving employee data: " + e.getMessage());
+        }
+    }
+
+    private static void displayEmployees() {
+        List<Employee> employees = new ArrayList<>();
+
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(EMPLOYEE_FILE))) {
+            employees = (List<Employee>) ois.readObject();
+            if (employees.isEmpty()) {
+                System.out.println("No employee records found.");
+            } else {
+                System.out.println("\nEmployee Records:");
+                for (Employee emp : employees) {
+                    System.out.println(emp);
+                }
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("No employee records found.");
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Error reading employee data: " + e.getMessage());
+        }
+    }
+}
